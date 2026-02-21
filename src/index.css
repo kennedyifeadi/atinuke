@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-cool-50: #f0f4f8;
+  --color-cool-100: #d9e2ec;
+  --color-cool-200: #bcccdc;
+  --color-cool-300: #9fb3c8;
+  --color-cool-400: #829ab1;
+  --color-cool-500: #627d98;
+  --color-cool-600: #486581;
+  --color-cool-700: #334e68;
+  --color-cool-800: #243b53;
+  --color-cool-900: #102a43;
+
+  --color-warm-sand: #fdf6e3;
+  --color-warm-peach: #ffebd2;
+  
+  --color-coral-400: #ff8c69;
+  --color-coral-500: #ff7f50;
+  --color-amber-500: #f59e0b;
+  --color-amber-600: #d97706;
+
+  --font-serif: "Playfair Display", serif;
+  --font-sans: "Inter", sans-serif;
+  
+  --animate-fade-in: fade-in 1s ease-out forwards;
+  --animate-slide-up: slide-up 0.8s ease-out forwards;
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-warm-sand text-cool-900 font-sans transition-colors duration-500 antialiased;
+  }
+  
+  .dark body {
+    @apply bg-zinc-950 text-cool-50;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif tracking-tight;
+  }
+}

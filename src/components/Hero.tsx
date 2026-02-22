@@ -1,3 +1,7 @@
+import image1 from '../assets/image 3.jpeg';
+import image2 from '../assets/image 9.jpeg';
+import image3 from '../assets/image 6.jpeg';  
+import image4 from '../assets/image 4.jpeg';  
 
 import { motion } from 'framer-motion';
 
@@ -56,7 +60,7 @@ export function Hero() {
               transition={{ delay: 0.5, duration: 1 }}
               whileHover={{ scale: 1.05, rotate: 0, zIndex: 40 }}
             >
-              <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=600&auto=format&fit=crop" alt="TK Portrait 1" className="w-full h-full object-cover" />
+              <img src={image1} alt="TK Portrait 1" className="w-full h-full object-cover" style={{objectPosition: "0 -10px"}} />
             </motion.div>
 
             <motion.div 
@@ -66,7 +70,7 @@ export function Hero() {
               transition={{ delay: 0.8, duration: 1 }}
               whileHover={{ scale: 1.05, rotate: 0, zIndex: 40 }}
             >
-              <img src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?q=80&w=600&auto=format&fit=crop" alt="TK Portrait 2" className="w-full h-full object-cover" />
+              <img src={image2} alt="TK Portrait 2" className="w-full h-full object-cover" />
             </motion.div>
 
             <motion.div 
@@ -76,7 +80,7 @@ export function Hero() {
               transition={{ delay: 1.1, duration: 1 }}
               whileHover={{ scale: 1.05, rotate: 0, zIndex: 40 }}
             >
-              <img src="https://images.unsplash.com/photo-1510520434124-5bc7e642b61d?q=80&w=600&auto=format&fit=crop" alt="TK Portrait 3" className="w-full h-full object-cover" />
+              <img src={image3} alt="TK Portrait 3" className="w-full h-full object-cover" />
             </motion.div>
           </div>
         </div>

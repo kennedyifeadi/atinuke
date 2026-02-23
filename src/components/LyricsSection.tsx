@@ -25,7 +25,7 @@ const LyricLine = ({ text, index, progress }: { text: string; index: number; pro
   return (
     <motion.p
       style={{ opacity, scale }}
-      className="text-4xl md:text-6xl font-sans font-bold text-cool-900 dark:text-coral-400 my-8 text-center"
+      className="text-3xl md:text-5xl lg:text-6xl font-sans font-bold text-cool-900 dark:text-coral-400 my-8 md:my-14 text-center max-w-4xl mx-auto"
     >
       {text}
     </motion.p>
@@ -41,25 +41,56 @@ export function LyricsSection() {
     offset: ["start center", "end center"]
   });
 
-  const isInView = useInView(containerRef, { amount: 0.2 });
+  const isInView = useInView(containerRef, { amount: 0.1 });
   const [isPlaying, setIsPlaying] = useState(false);
+  const [showOverlay, setShowOverlay] = useState(true);
 
   useEffect(() => {
     if (audioRef.current) {
-      if (isInView && !isPlaying) {
+      if (isInView) {
         audioRef.current.volume = 0.5;
-        audioRef.current.play().then(() => setIsPlaying(true)).catch(e => console.log("Audio autoplay blocked", e));
-      } else if (!isInView && isPlaying) {
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            setIsPlaying(true);
+            setShowOverlay(false);
+          }).catch(e => {
+            console.log("Audio autoplay blocked", e);
+            setIsPlaying(false);
+            setShowOverlay(true);
+          });
+        }
+      } else {
         audioRef.current.pause();
         setIsPlaying(false);
+        setShowOverlay(true);
       }
     }
-  }, [isInView, isPlaying]);
+  }, [isInView]);
+
+  const togglePlay = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+        setIsPlaying(false);
+        setShowOverlay(true);
+      } else {
+        audioRef.current.play().then(() => {
+          setIsPlaying(true);
+          setShowOverlay(false);
+        });
+      }
+    }
+  };
+
+  // We translate the container vertically based on scroll so all lyrics roll up the screen
+  const yOffset = useTransform(scrollYProgress, [0, 1], ["40%", "-60%"]);
 
   return (
     <section 
       ref={containerRef} 
-      className="relative bg-warm-sand dark:bg-zinc-900 transition-colors duration-500 py-20 h-[200vh]"
+      className="relative bg-warm-sand dark:bg-zinc-900 transition-colors duration-500 h-[400vh] cursor-pointer group"
+      onClick={togglePlay}
     >
       <audio 
         ref={audioRef}
@@ -68,20 +99,29 @@ export function LyricsSection() {
       />
       
       <div className="sticky top-0 h-screen flex flex-col items-center justify-center overflow-hidden px-6">
-        <div className="w-full max-w-4xl max-h-[100vh] relative z-10 flex flex-col items-center">
+        <motion.div 
+          style={{ y: yOffset }}
+          className="w-full relative z-10 flex flex-col items-center justify-start pt-[20vh]"
+        >
           {lyrics.map((lyric, index) => (
             <LyricLine key={index} text={lyric} index={index} progress={scrollYProgress} />
           ))}
-        </div>
+        </motion.div>
         
         {/* Decorative elements */}
-        <div className="absolute top-1/2 left-0 w-full h-1/2 bg-gradient-to-t from-warm-sand dark:from-zinc-900 to-transparent pointer-events-none z-20"></div>
-        <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-b from-warm-sand dark:from-zinc-900 to-transparent pointer-events-none z-20"></div>
+        <div className="absolute top-0 left-0 w-full h-1/4 bg-gradient-to-b from-warm-sand dark:from-zinc-900 to-transparent pointer-events-none z-20"></div>
+        <div className="absolute bottom-0 left-0 w-full h-1/4 bg-gradient-to-t from-warm-sand dark:from-zinc-900 to-transparent pointer-events-none z-20"></div>
         
         <div className="absolute bottom-10 z-30 flex items-center gap-4 text-cool-600 dark:text-cool-400">
-           <span className="text-sm tracking-widest uppercase font-sans">
-             {isPlaying ? 'Playing Music...' : 'Scroll slowly'}
-           </span>
+           {showOverlay ? (
+             <span className="text-sm tracking-widest uppercase font-sans font-bold bg-cool-200/50 dark:bg-zinc-800/50 px-4 py-2 rounded-full animate-pulse transition-all">
+               Tap anywhere to play with music
+             </span>
+           ) : (
+             <span className="text-sm tracking-widest uppercase font-sans opacity-70">
+               {isPlaying ? 'Playing Music... Scroll slowly' : 'Scroll slowly'}
+             </span>
+           )}
         </div>
       </div>
     </section>

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import { ThemeToggle } from './components/ThemeToggle';
 import { Hero } from './components/Hero';
 import { OriginStory } from './components/OriginStory';
 import { Nonchalant } from './components/Nonchalant';
@@ -20,7 +19,6 @@ function App() {
       </AnimatePresence>
 
       <div className={`w-full min-h-screen transition-opacity duration-1000 ${loading ? 'opacity-0 h-screen overflow-hidden' : 'opacity-100'}`}>
-        <ThemeToggle />
       <Hero />
       <OriginStory />
       <Nonchalant />

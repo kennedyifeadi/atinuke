@@ -12,25 +12,37 @@ export function VideoSection() {
   const isInView = useInView(containerRef, { amount: 0.6 });
 
   useEffect(() => {
-    if (videoRef.current) {
-      if (isInView) {
-        const playPromise = videoRef.current.play();
-        if (playPromise !== undefined) {
-          playPromise.then(() => {
-            setIsPlaying(true);
-            setShowOverlay(false);
-          }).catch(e => {
-            console.log("Autoplay blocked due to lack of user interaction:", e);
-            setIsPlaying(false);
-            setShowOverlay(true);
-          });
-        }
-      } else {
-        videoRef.current.pause();
-        setIsPlaying(false);
-        setShowOverlay(true);
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handlePlay = () => {
+      setIsPlaying(true);
+      setShowOverlay(false);
+    };
+
+    const handlePause = () => {
+      setIsPlaying(false);
+      setShowOverlay(true);
+    };
+
+    video.addEventListener('play', handlePlay);
+    video.addEventListener('pause', handlePause);
+
+    if (isInView) {
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(e => {
+          console.log("Autoplay blocked due to lack of user interaction:", e);
+        });
       }
+    } else {
+      video.pause();
     }
+
+    return () => {
+      video.removeEventListener('play', handlePlay);
+      video.removeEventListener('pause', handlePause);
+    };
   }, [isInView]);
 
   const togglePlay = () => {

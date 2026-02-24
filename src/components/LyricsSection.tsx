@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
-import { motion, useScroll, useTransform, useInView } from 'framer-motion';
+import { motion, useScroll, useTransform, useInView, MotionValue } from 'framer-motion';
 import feverDream from '../assets/feverDream.mp3';
 
 const lyrics = [
@@ -12,7 +12,7 @@ const lyrics = [
   "I'll be damned if you love me, damned if you don't"
 ];
 
-const LyricLine = ({ text, index, progress }: { text: string; index: number; progress: any }) => {
+const LyricLine = ({ text, index, progress }: { text: string; index: number; progress: MotionValue<number> }) => {
   // Map the overall scroll progress to the specific range for this line.
   // Assuming 7 lyrics, they are spaced evenly across the scroll region.
   const step = 1 / lyrics.length;
@@ -46,26 +46,38 @@ export function LyricsSection() {
   const [showOverlay, setShowOverlay] = useState(true);
 
   useEffect(() => {
-    if (audioRef.current) {
-      if (isInView) {
-        audioRef.current.volume = 0.5;
-        const playPromise = audioRef.current.play();
-        if (playPromise !== undefined) {
-          playPromise.then(() => {
-            setIsPlaying(true);
-            setShowOverlay(false);
-          }).catch(e => {
-            console.log("Audio autoplay blocked", e);
-            setIsPlaying(false);
-            setShowOverlay(true);
-          });
-        }
-      } else {
-        audioRef.current.pause();
-        setIsPlaying(false);
-        setShowOverlay(true);
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handlePlay = () => {
+      setIsPlaying(true);
+      setShowOverlay(false);
+    };
+
+    const handlePause = () => {
+      setIsPlaying(false);
+      setShowOverlay(true);
+    };
+
+    audio.addEventListener('play', handlePlay);
+    audio.addEventListener('pause', handlePause);
+
+    if (isInView) {
+      audio.volume = 0.5;
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(e => {
+          console.log("Audio autoplay blocked", e);
+        });
       }
+    } else {
+      audio.pause();
     }
+
+    return () => {
+      audio.removeEventListener('play', handlePlay);
+      audio.removeEventListener('pause', handlePause);
+    };
   }, [isInView]);
 
   const togglePlay = () => {

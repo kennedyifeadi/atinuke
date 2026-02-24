@@ -1,125 +1,172 @@
+import { useRef, useEffect, useState } from 'react';
+import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 
-import { useState, useRef } from 'react';
-import { motion, useAnimation, useDragControls } from 'framer-motion';
-import type { PanInfo } from 'framer-motion';
-import { useMediaQuery } from '../hooks/useMediaQuery';
-import { ChevronUp } from 'lucide-react';
+// Importing local assets with spaces
+import pic1 from '../assets/image 1.jpeg';
+import pic2 from '../assets/image 2.jpeg';
+import pic3 from '../assets/image 3.jpeg';
+import vid1 from '../assets/image 7.mp4';
+import vid2 from '../assets/image 8.mp4';
 
-const photos = [
-  { id: 1, url: 'https://images.unsplash.com/photo-1543807535-eceef0bc6599?q=80&w=600&auto=format&fit=crop', title: 'The DevFest Duo', story: 'You came for the speaker, I came for the company. We survived the crowd behind us, and I\'ll never forget the cameraman declaring us the "couple of the event." He had a good eye.' },
-  { id: 2, url: 'https://images.unsplash.com/photo-1529156069898-49953eb1f5bc?q=80&w=600&auto=format&fit=crop', title: 'Peaceful Evenings', story: 'Those long calls where neither of us realizes how much time has passed until we look at the clock.' },
-  { id: 3, url: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?q=80&w=600&auto=format&fit=crop', title: 'The Starting Lines', story: 'Before we knew each other, just seeing the brilliance from a distance. Then everything clicked into place.' },
-  { id: 4, url: 'https://images.unsplash.com/photo-1563241527-310ecacdd5ab?q=80&w=600&auto=format&fit=crop', title: 'The \'Friend\'', story: 'Atinuke with her far away best friend, Habeeb. (Lol).' },
+const items = [
+  { id: 1, type: 'image', url: pic1, title: 'The DevFest Duo', story: 'You came for the speaker, I came for the company. We survived the crowd behind us, and I\'ll never forget the cameraman declaring us the "couple of the event." He had a good eye.' },
+  { id: 2, type: 'video', url: vid1, title: 'In Motion', story: 'Captured moments of our vibrant life together, where every second counts.' },
+  { id: 3, type: 'image', url: pic2, title: 'Peaceful Evenings', story: 'Those long calls where neither of us realizes how much time has passed until we look at the clock.' },
+  { id: 4, type: 'video', url: vid2, title: 'Laughter & Joy', story: 'The smiles that light up our darkest days.' },
+  { id: 5, type: 'image', url: pic3, title: 'The Starting Lines', story: 'Before we knew each other, just seeing the brilliance from a distance. Then everything clicked into place.' },
 ];
 
-function MobilePhotoItem({ photo }: { photo: any }) {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const controls = useAnimation();
-  const drawerRef = useRef<HTMLDivElement>(null);
-  const dragControls = useDragControls();
+interface MediaItem {
+  id: number;
+  type: string;
+  url: string;
+  title: string;
+  story: string;
+}
 
-  // Handle drag end
-  const handleDragEnd = (_event: any, info: PanInfo) => {
-    const threshold = 50; 
-    if (info.offset.y < -threshold) {
-      setIsExpanded(true);
-      controls.start({ y: "-30vh" }); // Slides up 50% max (since it starts at 20%)
-    } else if (info.offset.y > threshold) {
-      setIsExpanded(false);
-      controls.start({ y: 0 }); // Reset back down
+function StackingMedia({ item, index }: { item: MediaItem, index: number }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end start"]
+  });
+  
+  const isInView = useInView(sentinelRef, { amount: 0.5 });
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [showOverlay, setShowOverlay] = useState(true);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (item.type !== 'video' || !video) return;
+
+    const handlePlay = () => {
+      setIsPlaying(true);
+      setShowOverlay(false);
+    };
+
+    const handlePause = () => {
+      setIsPlaying(false);
+      setShowOverlay(true);
+    };
+
+    video.addEventListener('play', handlePlay);
+    video.addEventListener('pause', handlePause);
+
+    if (isInView) {
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(e => {
+          console.log("Autoplay blocked due to lack of user interaction:", e);
+        });
+      }
     } else {
-      // snap back to current state
-      controls.start({ y: isExpanded ? "-30vh" : 0 });
+      video.pause();
+    }
+
+    return () => {
+      video.removeEventListener('play', handlePlay);
+      video.removeEventListener('pause', handlePause);
+    };
+  }, [isInView, item.type]);
+
+  const togglePlay = () => {
+    if (item.type === 'video' && videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
+        setIsPlaying(false);
+        setShowOverlay(true);
+      } else {
+        videoRef.current.play().then(() => {
+          setIsPlaying(true);
+          setShowOverlay(false);
+        });
+      }
     }
   };
+  
+  // Parallax subtle effect on the image when scrolled past
+  const y = useTransform(scrollYProgress, [0, 1], ["0%", "25%"]);
+  // Dim the image slightly to give depth to the next stacked image
+  const opacity = useTransform(scrollYProgress, [0, 1], [1, 0.4]);
 
   return (
-    <div className="relative w-full h-[80vh] flex items-center justify-center snap-center mb-10 overflow-hidden rounded-3xl shadow-2xl">
-      <img src={photo.url} alt={photo.title} className="absolute inset-0 w-full h-full object-cover" />
-      
-      {/* Bottom Drawer Overlay */}
-      <motion.div 
-        ref={drawerRef}
-        className="absolute bottom-0 left-0 w-full bg-zinc-900/80 backdrop-blur-md rounded-t-3xl border-t border-white/10 text-white"
-        initial={{ y: 0, height: "20vh" }}
-        animate={controls}
-        drag="y"
-        dragControls={dragControls}
-        dragConstraints={{ top: -window.innerHeight * 0.3, bottom: 0 }}
-        dragElastic={0.1}
-        onDragEnd={handleDragEnd}
-        style={{ height: "50vh" }} // Allow expanding up to 50vh, initial visual block starts lower
+    <>
+      <div 
+        ref={sentinelRef} 
+        className="absolute w-full h-[100dvh] pointer-events-none"
+        style={{ top: `${index * 100}dvh` }}
+      />
+      <div 
+        ref={containerRef}
+        className={`sticky top-0 h-[100dvh] w-full overflow-hidden shadow-2xl bg-zinc-950 ${item.type === 'video' ? 'cursor-pointer group' : ''}`}
+        style={{ zIndex: index }}
+        onClick={item.type === 'video' ? togglePlay : undefined}
       >
-        <div className="w-full flex justify-center py-4 cursor-grab active:cursor-grabbing" onPointerDown={e => dragControls.start(e)}>
-          <div className="flex flex-col items-center gap-1 opacity-70">
-            <ChevronUp size={20} className={isExpanded ? "rotate-180 transition-transform" : "transition-transform"} />
-            <span className="text-xs tracking-widest uppercase mb-1">{isExpanded ? 'Drag down' : 'Drag me up'}</span>
-            <div className="w-12 h-1 bg-white/30 rounded-full" />
-          </div>
-        </div>
-        
-        <div className="px-6 pb-6 h-full overflow-y-auto">
-          <h3 className="text-2xl font-serif text-coral-400 mb-4">{photo.title}</h3>
-          <p className="text-cool-200 font-sans leading-relaxed opacity-0 animate-fade-in" style={{ animationDelay: isExpanded ? '0.2s' : '0s', animationFillMode: 'forwards' }}>
-            {isExpanded ? photo.story : ''}
+      <motion.div style={{ y, opacity }} className="absolute inset-0 w-full h-full text-white">
+        {item.type === 'video' ? (
+          <>
+            <video 
+              ref={videoRef}
+              src={item.url} 
+              className="w-full h-full object-cover"
+              loop
+              playsInline
+            />
+            {/* Subtle overlay for paused video state */}
+            <div className={`absolute inset-0 transition-opacity duration-700 flex flex-col items-center justify-center ${showOverlay ? 'bg-black/40 backdrop-blur-sm opacity-100' : 'opacity-0 pointer-events-none'}`}>
+              <div className="w-20 h-20 rounded-full border-2 border-white/50 flex items-center justify-center text-white/80 bg-black/20 group-hover:scale-110 transition-transform duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              </div>
+              <span className="text-white/80 mt-4 text-sm font-medium tracking-wider drop-shadow-md">
+                Tap to play with sound
+              </span>
+            </div>
+          </>
+        ) : (
+          <img 
+            src={item.url} 
+            alt={item.title} 
+            className="w-full h-full object-cover"
+          />
+        )}
+      </motion.div>
+      
+      {/* Text overlay floating at bottom left */}
+      <div className="absolute bottom-0 left-0 p-6 md:p-12 w-full max-w-3xl z-10 pb-12 md:pb-16 xl:pb-24">
+        <div className="bg-black/50 backdrop-blur-md p-6 md:p-8 rounded-2xl md:rounded-3xl border border-white/10 shadow-2xl">
+          <h3 className="text-3xl md:text-4xl lg:text-5xl font-serif text-coral-400 mb-3">{item.title}</h3>
+          <p className="text-white/95 font-sans text-base md:text-lg lg:text-xl leading-relaxed">
+            {item.story}
           </p>
         </div>
-      </motion.div>
-    </div>
+      </div>
+      </div>
+    </>
   );
 }
 
 export function PhotoGrid() {
-  const isMobile = useMediaQuery('(max-width: 768px)');
-
   return (
-    <section className="py-24 md:py-32 px-4 md:px-6 lg:px-20 bg-warm-sand dark:bg-zinc-900 transition-colors duration-500 min-h-screen">
-      <div className="max-w-7xl mx-auto">
-        
+    <section className="relative bg-warm-sand dark:bg-zinc-900 transition-colors duration-500">
+      <div className="py-24 md:py-32 px-4 md:px-6 text-center border-b border-black/5 dark:border-white/5 relative z-10 bg-warm-sand dark:bg-zinc-900">
         <motion.div 
-          className="text-center mb-12 md:mb-16"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
         >
-          <h2 className="text-4xl md:text-5xl font-serif text-cool-900 dark:text-coral-400 mb-4">Moments & Memories</h2>
-          <p className="text-lg text-cool-600 dark:text-cool-300 font-sans">Swipe, hover, and explore</p>
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif text-cool-900 dark:text-coral-400 mb-4">Moments & Memories</h2>
+          <p className="text-lg md:text-xl text-cool-600 dark:text-cool-300 font-sans">Scroll through our journey</p>
         </motion.div>
+      </div>
 
-        {isMobile ? (
-          <div className="w-full snap-y snap-mandatory h-[85vh] overflow-y-scroll pb-[20vh] hide-scrollbar">
-            {photos.map(photo => (
-              <MobilePhotoItem key={photo.id} photo={photo} />
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {photos.map((photo, i) => (
-              <motion.div
-                key={photo.id}
-                className="relative group rounded-2xl overflow-hidden shadow-xl aspect-square lg:aspect-[4/3] cursor-pointer"
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ delay: i * 0.1, duration: 0.6 }}
-              >
-                <img 
-                  src={photo.url} 
-                  alt={photo.title} 
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-                />
-                
-                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-6 text-center">
-                   <h3 className="text-white font-serif text-2xl lg:text-3xl tracking-wide">
-                     {photo.title}
-                   </h3>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        )}
-        
+      <div className="relative w-full">
+        {items.map((item, i) => (
+          <StackingMedia key={item.id} item={item} index={i} />
+        ))}
       </div>
     </section>
   );

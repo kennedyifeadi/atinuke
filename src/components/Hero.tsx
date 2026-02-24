@@ -17,7 +17,7 @@ export function Hero() {
         
         {/* Text Content */}
         <motion.div 
-          className="flex-1 text-center lg:text-left pt-20 lg:pt-0 flex flex-col justify-center"
+          className="flex-1 text-center lg:text-left pt-10 lg:pt-0 flex flex-col justify-center"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.2, ease: "easeOut" }}

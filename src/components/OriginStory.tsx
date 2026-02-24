@@ -26,11 +26,11 @@ export function OriginStory() {
             </h2>
             
             <p className="text-xl md:text-2xl text-cool-700 dark:text-cool-200 font-sans font-light leading-[1.8] md:leading-[2] max-w-2xl">
-              Then came that volunteering event. I was trying to play it cool, and you hit me with:{' '}
+              Then came Ibadan TechExpo. I was trying to play it cool, and you hit me with:{' '}
               <span className="font-serif italic text-cool-900 dark:text-coral-500 font-medium">
                 "Kennedy Ifeadi, I know you now."
               </span>{' '}
-              I was terrified of doing too much, but somehow you ended up thinking I was doing too little.
+              I was like, you know me ke, and i just tried to keep my cool and form sigma boy.
             </p>
           </div>
         </motion.div>

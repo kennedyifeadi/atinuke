@@ -16,7 +16,7 @@ export function Nonchalant() {
           className="mb-16"
         >
           <p className="text-2xl md:text-3xl text-cool-800 dark:text-cool-200 font-serif leading-relaxed max-w-3xl">
-            Who knew that would lead to a 5-hour phone call that kept my roommates awake because I couldn't stop laughing? Or you roasting my "nonchalant" texting style.
+            Who knew that our little conversation would lead to a 5-hour phone call that kept my roommates awake because I couldn't stop laughing? Or you roasting my "nonchalant" texting style.
           </p>
         </motion.div>
 

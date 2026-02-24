@@ -9,19 +9,18 @@ import vid1 from '../assets/image 7.mp4';
 import vid2 from '../assets/image 8.mp4';
 
 const items = [
-  { id: 1, type: 'image', url: pic1, title: 'The DevFest Duo', story: 'You came for the speaker, I came for the company. We survived the crowd behind us, and I\'ll never forget the cameraman declaring us the "couple of the event." He had a good eye.' },
-  { id: 2, type: 'video', url: vid1, title: 'In Motion', story: 'Captured moments of our vibrant life together, where every second counts.' },
-  { id: 3, type: 'image', url: pic2, title: 'Peaceful Evenings', story: 'Those long calls where neither of us realizes how much time has passed until we look at the clock.' },
-  { id: 4, type: 'video', url: vid2, title: 'Laughter & Joy', story: 'The smiles that light up our darkest days.' },
-  { id: 5, type: 'image', url: pic3, title: 'The Starting Lines', story: 'Before we knew each other, just seeing the brilliance from a distance. Then everything clicked into place.' },
+  { id: 1, type: 'image', url: pic1, text: 'Just a picture of you at DevFest.' },
+  { id: 2, type: 'video', url: vid1, text: 'Come and give me all your money. Abeg.' },
+  { id: 3, type: 'image', url: pic2, text: 'Atinuke with her far away best friend.' },
+  { id: 4, type: 'video', url: vid2, text: 'POV: they said I should do a video. They said I should do a video shoot.' },
+  { id: 5, type: 'image', url: pic3, text: 'The Glamour, The Smile, The Aura, The Steeze. This is TK in her element.' },
 ];
 
 interface MediaItem {
   id: number;
   type: string;
   url: string;
-  title: string;
-  story: string;
+  text: string;
 }
 
 function StackingMedia({ item, index }: { item: MediaItem, index: number }) {
@@ -128,21 +127,20 @@ function StackingMedia({ item, index }: { item: MediaItem, index: number }) {
         ) : (
           <img 
             src={item.url} 
-            alt={item.title} 
+            alt="Memory" 
             className="w-full h-full object-cover"
           />
         )}
       </motion.div>
       
-      {/* Text overlay floating at bottom left */}
-      <div className="absolute bottom-0 left-0 p-6 md:p-12 w-full max-w-3xl z-10 pb-12 md:pb-16 xl:pb-24">
-        <div className="bg-black/50 backdrop-blur-md p-6 md:p-8 rounded-2xl md:rounded-3xl border border-white/10 shadow-2xl">
-          <h3 className="text-3xl md:text-4xl lg:text-5xl font-serif text-coral-400 mb-3">{item.title}</h3>
-          <p className="text-white/95 font-sans text-base md:text-lg lg:text-xl leading-relaxed">
-            {item.story}
+      {/* Text overlay layer at the very bottom */}
+      {item.text && (
+        <div className="absolute bottom-0 left-0 w-full z-10 px-4 md:px-8 pb-6 md:pb-10 pt-32 bg-gradient-to-t from-black/90 via-black/40 to-transparent">
+          <p className="text-white font-sans text-xl md:text-2xl lg:text-3xl leading-relaxed">
+            {item.text}
           </p>
         </div>
-      </div>
+      )}
       </div>
     </>
   );

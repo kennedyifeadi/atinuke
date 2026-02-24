@@ -64,7 +64,7 @@ export function VideoSection() {
     <section className="bg-cool-50 dark:bg-zinc-950 transition-colors duration-500 relative flex items-center justify-center min-h-[90vh]">
       <div 
         ref={containerRef}
-        className="w-full aspect-video overflow-hidden shadow-2xl relative bg-black cursor-pointer group"
+        className="w-full h-[100dvh] md:h-auto md:aspect-video overflow-hidden shadow-2xl relative bg-black cursor-pointer group"
         onClick={togglePlay}
       >
         <video 

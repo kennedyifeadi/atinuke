@@ -1,7 +1,6 @@
 import image1 from '../assets/image 3.jpeg';
 import image2 from '../assets/image 9.jpeg';
 import image3 from '../assets/image 6.jpeg';  
-import image4 from '../assets/image 4.jpeg';  
 
 import { motion } from 'framer-motion';
 
